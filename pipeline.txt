@@ -5,15 +5,15 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git branch: 'main', url: 'https://github.com/rahularulbalan-011105/devops-model'
+                git branch: 'main', url: 'https://github.com/priyalingaiah/devops-model'
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 bat '''
-                C:\\Users\\rahul\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pip install --upgrade pip
-                C:\\Users\\rahul\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pip install -r requirements.txt
+                C:/Users/priya/AppData/Local/Programs/Python/Python39/python.exe -m pip install --upgrade pip
+                C:/Users/priya/AppData/Local/Programs/Python/Python39/python.exe -m pip install -r requirements.txt
                 '''
             }
         }
@@ -24,7 +24,7 @@ pipeline {
                     bat '''
                     taskkill /F /IM streamlit.exe >nul 2>&1 || ver >nul
 
-                    powershell -Command "Start-Process -FilePath 'C:\\Users\\rahul\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\streamlit.exe' -ArgumentList 'run stream.py --server.port 8501 --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -RedirectStandardOutput '%WORKSPACE%\\streamlit_out.log' -RedirectStandardError '%WORKSPACE%\\streamlit_err.log'"
+                    powershell -Command "Start-Process -FilePath 'C:/Users/priya/AppData/Local/Programs/Python/Python39/Scripts/streamlit.exe' -ArgumentList 'run stream.py --server.port 8501 --server.address 0.0.0.0 --server.headless true --browser.gatherUsageStats false' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -RedirectStandardOutput '%WORKSPACE%\\streamlit_out.log' -RedirectStandardError '%WORKSPACE%\\streamlit_err.log'"
 
                     ping -n 6 127.0.0.1 >nul
 
