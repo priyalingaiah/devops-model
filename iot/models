@@ -1,1 +1,473 @@
+1. (a+ b)² 
+
+MOV A, 20H
+ADD A, 21H
+MOV B, A
+MUL AB
+MOV 22H, B
+MOV 23H, A
+
+2. Sum of first 5 odd numbers n^2
+
+MOV R0, #05H      ; N = 5 (you can change this value)
+MOV A, R0         ; Copy N into accumulator
+MOV B, R0         ; Copy N into register B
+MUL AB            ; Multiply A * B → result in A (low byte), B (high byte)
+
+MOV 22H, A        ; Store low byte of result at 22H
+MOV 23H, B        ; Store high byte of result at 23H
+
+3. (a − b)² 
+
+MOV A, 20H
+CLR C
+SUBB A, 21H
+MOV B, A
+MUL AB
+MOV 22H, B
+MOV 23H, A
+
+4 sum of even numbers
+
+MOV R0, #05H      ; N = 5 (you can change this value)
+MOV A, R0         ; Copy N into accumulator
+INC A             ; A = N + 1
+MOV B, R0         ; B = N
+MUL AB            ; Multiply A * B → result = N(N+1)
+
+MOV 22H, A        ; Store low byte of result at 22H
+MOV 23H, B        ; Store high byte of result at 23H
+
+5.(a² − b²) 
+
+MOV A, 20H
+MOV B, A
+MUL AB
+MOV R0, A
+MOV A, 21H
+MOV B, A
+MUL AB
+CLR C
+SUBB A, R0
+MOV 22H, A
+
+6.Area of triangle = (base × height) / 2
+MOV A, 20H
+MOV B, 21H
+MUL AB
+MOV B, #02H
+DIV AB
+MOV 22H, A
+
+8. Area of square = side² 
+MOV A, 20H
+MOV B, A
+MUL AB
+MOV 22H, B
+MOV 23H, A
+
+10.Area of circle = πr² 
+MOV A, 20H
+MOV B, A
+MUL AB
+MOV B, #03H
+MUL AB
+MOV 22H, B
+MOV 23H, A
+
+11. Area of rectangle
+
+MOV A, 20H
+MOV B, 21H
+MUL AB
+MOV 22H, B
+MOV 23H, A
+
+2 b blinking of led
+START:  MOV A, P2
+
+LOOP:   MOV P1, A
+        ACALL DELAY
+        CPL A
+        SJMP LOOP
+
+DELAY:  MOV R1, #0FH
+WAIT:   DJNZ R1, WAIT
+        RET
+
+2 d square wave
+clr p0.7
+start:
+mov a,#00h
+mov p1,a
+lcall delay
+mov a,#0a5h
+mov p1,a
+lcall delay
+sjmp start
+delay:
+mov r1,#00001111b
+wait:djnz r1,wait
+Ret
+
+3 a
+#include<reg51.h>
+void main(void)
+{
+unsigned char a,b,c,d,Y;
+while(1)
+{
+P1 = 0xff; //data
+P2 = 0Xff; //data
+a=P1;
+b=P2;
+c = a+b;
+d = a-b;
+Y = (c*d)/2;
+P3 = Y;
+}
+}
+
+3b
+
+#include <REG51.H>
+void main(void)
+{
+    unsigned int i;
+    while(1) {
+        P1 = 0x00;
+        P2 = 0x00;
+        for(i = 0; i < 65535; i++);
+
+        P1 = 0xFF;
+        P2 = 0xFF;
+        for(i = 0; i < 65535; i++);
+    }}
+
+4 esp32
+builtin led
+void setup() {
+  pinMode(13, OUTPUT);
+}
+void loop() {
+  digitalWrite(13, HIGH);
+  delay(1000);
+  digitalWrite(13, LOW);
+  delay(1000);}
+
+
+External led
+int myled = 9;
+void setup() {
+  pinMode(myled, OUTPUT);
+}
+void loop() {
+  digitalWrite(myled, HIGH);
+  delay(1000);
+  digitalWrite(myled, LOW);
+  delay(1000);}
+
+Ir sensor
+int ledPin = 13;
+int sensorPin = 49;
+int obstacleDetected = LOW;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(sensorPin, INPUT);
+  Serial.begin(9600);
+}
+void loop() {
+  obstacleDetected = digitalRead(sensorPin);
+  if (obstacleDetected == LOW) {
+    Serial.println("Stop! obstacle detected");
+    digitalWrite(ledPin, HIGH);
+  } else {
+    Serial.println("No Obstacle, Go ahead!");
+    digitalWrite(ledPin, LOW);
+  }
+  delay(200);}
+
+Ultrasonic sensor
+
+const int trig = 3;
+const int echo = 2;
+long roundtriptime;
+int dist;
+
+void setup() {
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  Serial.begin(9600);}
+
+void loop() {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  roundtriptime = pulseIn(echo, HIGH);
+  dist = (roundtriptime / 2) * 0.034;
+  Serial.print("Distance: ");
+  Serial.println(dist);}
+
+5. Esp dht 
+
+#include "ThingSpeak.h"
+#include <WiFi.h>
+#include "DHT.h"
+
+char ssid[] = "OnePlusNord4";
+char pass[] = "password";
+WiFiClient client;
+
+const int out = 23;
+float temperature = 0;
+DHT dht(23, DHT11);
+
+unsigned long myChannelField = number;
+const int TemperatureField = 1;
+const int HumidityField = 2;
+const char* myWriteAPIKey = "paste here";
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(out, INPUT);
+  ThingSpeak.begin(client);
+  dht.begin();
+  delay(500);}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) {
+      WiFi.begin(ssid, pass);
+      delay(5000);
+    }  }
+
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+  Serial.print("Humidity ");
+  Serial.print(humidity);
+  Serial.println(" g.m-3");
+
+  ThingSpeak.writeField(myChannelField, TemperatureField, temperature, myWriteAPIKey);
+  ThingSpeak.writeField(myChannelField, HumidityField, humidity, myWriteAPIKey);
+  delay(100);}
+
+6 Pi 
+
+import requests
+import time
+import RPi.GPIO as GPIO
+
+THINGSPEAK_WRITE_API_KEY = 'api key'
+THINGSPEAK_URL = f'https://api.thingspeak.com/update?api_key={THINGSPEAK_WRITE_API_KEY}'
+
+GPIO.cleanup()
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(8, GPIO.IN)
+
+def send_data_to_thingspeak(field_value):
+    data = {'field1': field_value}
+    res=requests.post(THINGSPEAK_URL, data=data)
+    print("Response:", response.text)
+
+try:
+    while True:
+        if GPIO.input(8) == 0:
+            print("IR sensor detected the object")
+            send_data_to_thingspeak(1)
+        else:
+            print("IR sensor did not detect the object")
+            send_data_to_thingspeak(0)
+        time.sleep(15)
+finally:
+    GPIO.cleanup()
+
+V2 
+import requests
+import time
+import RPi.GPIO as GPIO
+
+THINGSPEAK_WRITE_API_KEY = 'api key'
+THINGSPEAK_URL = f'https://api.thingspeak.com/update?api_key={THINGSPEAK_WRITE_API_KEY}'
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(8, GPIO.IN)
+
+def send_data_to_thingspeak(field_value):
+    data = {'field1': field_value}
+    try:
+        response = requests.post(THINGSPEAK_URL, data=data)
+        print("Data sent successfully to ThingSpeak.")
+        print("Response:", response.text)
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to send data to ThingSpeak: {e}")
+
+try:
+    while True:
+        if GPIO.input(8) == 0:
+            print("IR sensor detected the object")
+            send_data_to_thingspeak(1)
+        else:
+            print("IR sensor did not detect the object")
+            send_data_to_thingspeak(0)
+        time.sleep(15)
+except KeyboardInterrupt:
+    print("Program stopped by user.")
+finally:
+    GPIO.cleanup()
+
+7 Raspberry Pi Server 
+
+import socket
+
+server_ip = '0.0.0.0'
+server_port = 8080
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((server_ip, server_port))
+server_socket.listen(1)
+
+client_socket, addr = server_socket.accept()
+print(f"Connection from {addr} established.")
+
+try:
+    while True:
+        data = client_socket.recv(1024).decode('utf-8')
+        if data:
+            print(f"Received from ESP32: {data}")
+            response = "Hello from Raspberry Pi!"
+            client_socket.send(response.encode('utf-8'))
+except KeyboardInterrupt:
+    print("Server closed")
+finally:
+    client_socket.close()
+    server_socket.close()
+
+Esp 32
+#include <WiFi.h>
+
+const char* ssid = "Wi-Fi Name";
+const char* password = "Password";
+
+const char* server_ip = "192.168.0.112"; 
+const uint16_t server_port = 8080;
+
+WiFiClient client;
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
+  if (client.connect(server_ip, server_port)) {
+    Serial.println("Connected to Raspberry Pi");
+  } else {
+    Serial.println("Connection failed");
+  }
+}
+
+void loop() {
+  client.println("Hello from ESP32!");
+
+  if (client.available()) {
+    String response = client.readStringUntil('\n');
+    Serial.println("Received: " + response);
+  }
+
+  delay(2000);}
+
+Esp ir
+#include "ThingSpeak.h"
+#include <WiFi.h>
+
+char ssid[] = "OnePlusNord4";
+char pass[] = "password";
+
+WiFiClient client;
+
+const int irPin = 19;   // IR sensor pin
+
+unsigned long myChannelField = number;   // Channel ID
+const int IRField = 1;                   // Field for IR sensor
+const char* myWriteAPIKey = "paste here";
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(irPin, INPUT);
+  ThingSpeak.begin(client);
+  delay(500);}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) {
+      WiFi.begin(ssid, pass);
+      delay(5000);
+    }
+  }
+
+  int irValue = digitalRead(irPin);
+
+  Serial.print("IR Sensor Value: ");
+  Serial.println(irValue);
+
+  ThingSpeak.writeField(myChannelField, IRField, irValue, myWriteAPIKey);
+
+  delay(1000);}
+
+Esp us
+#include "ThingSpeak.h"
+#include <WiFi.h>
+
+char ssid[] = "OnePlusNord4";
+char pass[] = "password";
+
+WiFiClient client;
+
+const int trigPin = 5;   // Ultrasonic trigger
+const int echoPin = 18;  // Ultrasonic echo
+
+unsigned long myChannelField = number;   // Channel ID
+const int DistanceField = 2;             // Field for distance
+const char* myWriteAPIKey = "paste here";
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  ThingSpeak.begin(client);
+  delay(500);}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) {
+      WiFi.begin(ssid, pass);
+      delay(5000);
+   }  }
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  float distance = (duration / 2.0) * 0.034;
+
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+  ThingSpeak.writeField(myChannelField, DistanceField, distance, myWriteAPIKey);
+
+  delay(1000);}
 
